@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Цветовой круг — подбор сочетаний</title>
+<style>
+  :root {
+    --bg: #f4f6f9; --panel: #ffffff; --text: #1c1e21; --muted: #6b7280;
+    --border: #e3e6eb; --card-bg: #f7f8fa;
+    --shadow: 0 4px 18px rgba(0,0,0,.07); --accent: #3b82f6;
+  }
+  [data-theme="dark"] {
+    --bg: #121418; --panel: #1c1f25; --text: #e8eaed; --muted: #98a0ab;
+    --border: #2c313a; --card-bg: #23272f;
+    --shadow: 0 4px 18px rgba(0,0,0,.45); --accent: #60a5fa;
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg); color: var(--text); min-height: 100vh;
+    transition: background .25s ease, color .25s ease;
+  }
+
+  .topbar {
+    position: sticky; top: 0; z-index: 20;
+    background: var(--panel); box-shadow: var(--shadow);
+    border-bottom: 1px solid var(--border);
+  }
+  header {
+    display: grid; grid-template-columns: auto 1fr auto;
+    align-items: center; gap: 20px; padding: 12px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  header h1 { margin: 0; font-size: 18px; font-weight: 650; letter-spacing: .2px; white-space: nowrap; }
+
+  .quote-block { text-align: center; min-width: 0; padding: 0 8px; }
+  .quote-text {
+    margin: 0; font-size: 13.5px; line-height: 1.35; font-style: italic; color: var(--text);
+    overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  }
+  .quote-author {
+    margin: 2px 0 0; font-size: 11.5px; font-weight: 600;
+    letter-spacing: .4px; color: var(--muted); text-transform: uppercase;
+  }
+
+  .header-actions { display: flex; gap: 8px; align-items: center; justify-self: end; }
+
+  .theme-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 9px 16px; font-size: 14px; font-family: inherit; font-weight: 500;
+    color: var(--text); background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 10px; cursor: pointer;
+    transition: background .2s, border-color .2s, transform .1s; white-space: nowrap;
+  }
+  .theme-btn:hover { border-color: var(--accent); }
+  .theme-btn:active { transform: scale(.97); }
+
+  @media (max-width: 700px) {
+    header {
+      grid-template-columns: 1fr auto;
+      grid-template-areas: "title actions" "quote quote"; row-gap: 8px;
+    }
+    header h1 { grid-area: title; }
+    .header-actions { grid-area: actions; justify-self: end; gap: 6px; }
+    .theme-btn { padding: 7px 10px; font-size: 12px; }
+    .quote-block { grid-area: quote; }
+    .quote-text { -webkit-line-clamp: 3; font-size: 12.5px; }
+  }
+
+  .tabs { display: flex; gap: 4px; padding: 0 16px; flex-wrap: wrap; }
+  .tab {
+    padding: 12px 18px; background: transparent; border: none;
+    border-bottom: 3px solid transparent; color: var(--muted);
+    font: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
+    transition: color .2s, border-color .2s;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--text); border-bottom-color: var(--accent); }
+
+  main {
+    max-width: 1080px; margin: 0 auto; padding: 24px 20px 60px;
+    display: flex; flex-direction: column; gap: 18px;
+  }
+
+  .panel {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 16px; padding: 18px 20px; box-shadow: var(--shadow);
+    transition: background .25s, border-color .25s;
+  }
+  .panel h2 {
+    margin: 0 0 14px; font-size: 15px; font-weight: 600;
+    color: var(--muted); text-transform: uppercase; letter-spacing: .6px;
+  }
+
+  .controls { display: flex; align-items: center; flex-wrap: wrap; gap: 14px; }
+  .controls label { font-size: 14px; font-weight: 500; }
+
+  input[type="color"] {
+    width: 56px; height: 44px; padding: 0;
+    border: 1px solid var(--border); border-radius: 10px;
+    background: none; cursor: pointer;
+  }
+  input[type="color"]::-webkit-color-swatch-wrapper { padding: 4px; }
+  input[type="color"]::-webkit-color-swatch { border: none; border-radius: 6px; }
+
+  #hexInput {
+    width: 130px; padding: 11px 12px;
+    font-family: ui-monospace, "SF Mono", Consolas, monospace;
+    font-size: 15px; letter-spacing: .5px; color: var(--text);
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 10px; outline: none; transition: border-color .2s;
+  }
+  #hexInput:focus { border-color: var(--accent); }
+
+  .hint { font-size: 12px; color: var(--muted); }
+
+  .top-grid { display: grid; grid-template-columns: 1fr 300px; gap: 18px; }
+  @media (max-width: 760px) { .top-grid { grid-template-columns: 1fr; } }
+
+  .main-swatch {
+    height: 150px; border-radius: 12px; border: 1px solid var(--border);
+    transition: background .2s;
+  }
+
+  .copy-btn {
+    display: flex; align-items: baseline; gap: 10px; width: 100%;
+    padding: 6px 10px; background: transparent; border: 1px solid transparent;
+    border-radius: 8px; font-family: ui-monospace, "SF Mono", Consolas, monospace;
+    font-size: 14px; color: var(--text); text-align: left;
+    cursor: pointer; transition: background .15s, border-color .15s, transform .08s;
+  }
+  .copy-btn:hover { background: var(--card-bg); border-color: var(--accent); }
+  .copy-btn:active { transform: scale(.98); }
+  .copy-btn .k {
+    color: var(--muted); font-weight: 700; font-size: 11px;
+    letter-spacing: .7px; min-width: 30px;
+  }
+
+  .codes { margin-top: 14px; display: flex; flex-direction: column; gap: 4px; }
+  .codes .copy-btn { font-size: 15px; }
+
+  .wheel-panel { display: flex; flex-direction: column; }
+  .wheel-wrap { display: flex; justify-content: center; }
+
+  .wheel {
+    position: relative; width: 230px; height: 230px; border-radius: 50%;
+    border: 1px solid var(--border);
+    background-image:
+      radial-gradient(circle closest-side, #ffffff 0%, rgba(255,255,255,0) 72%),
+      conic-gradient(from 0deg,
+        hsl(0,100%,50%),   hsl(60,100%,50%),  hsl(120,100%,50%),
+        hsl(180,100%,50%), hsl(240,100%,50%), hsl(300,100%,50%), hsl(360,100%,50%));
+    cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none;
+  }
+
+  .dot {
+    position: absolute; left: 50%; top: 50%;
+    width: 13px; height: 13px; border-radius: 50%;
+    border: 2px solid #fff; box-shadow: 0 1px 5px rgba(0,0,0,.5);
+    pointer-events: none; animation: pop .18s ease-out;
+  }
+  .dot.main { width: 19px; height: 19px; border-width: 3px; z-index: 2; }
+  @keyframes pop { from { opacity: 0; } to { opacity: 1; } }
+
+  .wheel-hint {
+    margin: 12px 0 0; text-align: center; font-size: 12px;
+    color: var(--muted); line-height: 1.4;
+  }
+
+  .random-btn {
+    margin-top: 14px; padding: 11px 18px; width: 100%;
+    font: inherit; font-size: 14px; font-weight: 600; letter-spacing: .2px;
+    color: #fff; background: var(--accent); border: 1px solid var(--accent);
+    border-radius: 10px; cursor: pointer;
+    transition: opacity .2s, transform .1s, box-shadow .2s;
+  }
+  .random-btn:hover { opacity: .92; }
+  .random-btn:active { transform: scale(.97); }
+  .random-btn:disabled { opacity: .55; cursor: wait; }
+
+  .history-grid {
+    display: flex; flex-wrap: wrap; gap: 8px; min-height: 46px; align-items: center;
+  }
+  .history-item {
+    width: 46px; height: 46px; padding: 0; border-radius: 10px;
+    border: 2px solid var(--border); cursor: pointer;
+    transition: transform .1s, border-color .15s, box-shadow .15s;
+    outline: none; box-shadow: 0 1px 3px rgba(0,0,0,.08);
+  }
+  .history-item:hover { transform: translateY(-2px) scale(1.05); border-color: var(--accent); }
+  .history-item:active { transform: scale(.96); }
+  .history-item:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .history-item.current { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+  .history-empty { font-size: 13px; color: var(--muted); font-style: italic; }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
+  .card {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .card:hover { border-color: var(--accent); box-shadow: var(--shadow); }
+  .card .color { height: 84px; transition: background .2s; }
+  .card .meta { padding: 6px; display: flex; flex-direction: column; gap: 2px; }
+  .card .copy-btn { font-size: 13px; }
+
+  .palette-controls {
+    display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+    justify-content: flex-end; padding: 12px 0; position: sticky;
+    top: var(--topbar-h, 120px); background: var(--bg); z-index: 10;
+    border-bottom: 1px solid var(--border); margin-bottom: 8px;
+  }
+  .count-toggle { display: flex; gap: 8px; flex-wrap: wrap; }
+  .count-btn {
+    padding: 8px 16px; font: inherit; font-size: 13px; font-weight: 500;
+    color: var(--text); background: var(--card-bg);
+    border: 1px solid var(--border); border-radius: 20px; cursor: pointer;
+    transition: background .2s, border-color .2s, color .2s;
+  }
+  .count-btn:hover { border-color: var(--accent); }
+  .count-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  .palette-card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 16px; padding: 16px 18px; box-shadow: var(--shadow);
+    margin-bottom: 14px;
+  }
+  .palette-card h3 { margin: 0 0 12px; font-size: 15px; font-weight: 600; letter-spacing: .2px; }
+  .palette-colors {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px;
+  }
+  .color-item { display: flex; flex-direction: column; gap: 4px; }
+  .color-block {
+    height: 62px; border-radius: 10px; border: 1px solid var(--border);
+    cursor: pointer; transition: transform .1s, box-shadow .15s;
+  }
+  .color-block:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+  .color-block:active { transform: scale(.98); }
+  .color-item .copy-btn { font-size: 11px; padding: 3px 6px; gap: 6px; border-radius: 6px; }
+  .color-item .copy-btn .k { font-size: 9px; min-width: 22px; letter-spacing: .5px; }
+  .color-item .copy-btn span:last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* ============================================
+     ВЛИЯНИЕ СВЕТА
+     ============================================ */
+  .light-base-controls {
+    display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+  }
+  .light-base-controls label { font-size: 14px; font-weight: 500; }
+
+  #lightBaseHex {
+    width: 110px; padding: 10px 11px;
+    font-family: ui-monospace, "SF Mono", Consolas, monospace;
+    font-size: 13.5px; letter-spacing: .5px; color: var(--text);
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 10px; outline: none; transition: border-color .2s;
+  }
+  #lightBaseHex:focus { border-color: var(--accent); }
+
+  .light-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px;
+  }
+
+  .light-card {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .light-card:hover { border-color: var(--accent); box-shadow: var(--shadow); }
+
+  .light-name {
+    padding: 8px 12px; font-size: 12.5px; font-weight: 600; color: var(--text);
+    border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center; gap: 6px;
+  }
+  .light-note {
+    font-size: 10px; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .3px;
+  }
+
+  .light-preview { display: flex; height: 80px; position: relative; }
+
+  .light-before {
+    width: 38%; position: relative; transition: background .2s;
+  }
+  .light-before::before {
+    content: 'до';
+    position: absolute; left: 5px; top: 5px;
+    font-size: 9px; color: #fff; background: rgba(0,0,0,.55);
+    padding: 1px 5px; border-radius: 3px;
+    font-weight: 700; text-transform: uppercase; letter-spacing: .4px;
+  }
+
+  .light-after { flex: 1; position: relative; transition: background .2s; }
+  .light-after::after {
+    content: 'после';
+    position: absolute; right: 5px; top: 5px;
+    font-size: 9px; color: #fff; background: rgba(0,0,0,.55);
+    padding: 1px 5px; border-radius: 3px;
+    font-weight: 700; text-transform: uppercase; letter-spacing: .4px;
+  }
+
+  .light-codes { padding: 4px; border-top: 1px solid var(--border); }
+  .light-codes .copy-btn { font-size: 12px; padding: 4px 6px; gap: 6px; }
+  .light-codes .copy-btn .k { font-size: 9.5px; min-width: 24px; }
+
+  /* КОТЁНОК */
+  .kitten {
+    position: fixed; z-index: 15; width: 76px; height: 76px;
+    cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,.18));
+    transition: top .65s cubic-bezier(.34,1.56,.64,1),
+                left .65s cubic-bezier(.34,1.56,.64,1),
+                right .65s cubic-bezier(.34,1.56,.64,1);
+    will-change: top, left, right, transform;
+  }
+  .kitten svg {
+    display: block; width: 100%; height: 100%;
+    animation: kitten-idle 2.6s ease-in-out infinite;
+    transition: transform .15s ease;
+  }
+  .kitten:hover svg { animation: none; transform: scale(1.12) rotate(-6deg); }
+  .kitten:active svg { transform: scale(.85) rotate(3deg); }
+  .kitten.flying { pointer-events: none; z-index: 25; }
+  .kitten.flying svg { animation: none; transform: none; }
+  @keyframes kitten-idle {
+    0%, 100% { transform: translateY(0) rotate(0); }
+    25%      { transform: translateY(-5px) rotate(-2deg); }
+    75%      { transform: translateY(-3px) rotate(2deg); }
+  }
+  .meow-bubble {
+    position: absolute; top: -28px; left: 50%; transform: translateX(-50%);
+    padding: 4px 11px; background: #fff; color: #333;
+    font-size: 13px; font-weight: 700; border-radius: 14px;
+    white-space: nowrap; pointer-events: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,.18);
+    animation: meow-pop 1.2s ease-out forwards;
+  }
+  [data-theme="dark"] .meow-bubble { background: #2c313a; color: #fff; }
+  @keyframes meow-pop {
+    0%   { opacity: 0; transform: translateX(-50%) translateY(8px) scale(.7); }
+    20%  { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+    75%  { opacity: 1; transform: translateX(-50%) translateY(-6px) scale(1); }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-18px) scale(.9); }
+  }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 28px; transform: translate(-50%, 20px);
+    padding: 10px 18px; border-radius: 10px; background: #222; color: #fff;
+    font-size: 14px; opacity: 0; pointer-events: none;
+    transition: opacity .2s, transform .2s; z-index: 100; max-width: 90vw;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+</style>
+</head>
+<body>
+
+<div id="kitten" class="kitten" title="Погладь меня!">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="16,38 24,8 42,30" fill="#f4a460"/>
+    <polygon points="84,38 76,8 58,30" fill="#f4a460"/>
+    <polygon points="22,34 26,15 38,29" fill="#ffb6c1"/>
+    <polygon points="78,34 74,15 62,29" fill="#ffb6c1"/>
+    <circle cx="50" cy="56" r="36" fill="#f4a460"/>
+    <ellipse cx="37" cy="53" rx="5.5" ry="7.5" fill="#1a1a1a"/>
+    <ellipse cx="63" cy="53" rx="5.5" ry="7.5" fill="#1a1a1a"/>
+    <circle cx="39" cy="50.5" r="2" fill="#fff"/>
+    <circle cx="65" cy="50.5" r="2" fill="#fff"/>
+    <polygon points="50,63 47,68 53,68" fill="#ff6b9d"/>
+    <path d="M50 68 Q44 74 41 70" stroke="#1a1a1a" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+    <path d="M50 68 Q56 74 59 70" stroke="#1a1a1a" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+    <line x1="12" y1="60" x2="32" y2="63" stroke="#1a1a1a" stroke-width="1.1" stroke-linecap="round"/>
+    <line x1="12" y1="67" x2="32" y2="67" stroke="#1a1a1a" stroke-width="1.1" stroke-linecap="round"/>
+    <line x1="68" y1="63" x2="88" y2="60" stroke="#1a1a1a" stroke-width="1.1" stroke-linecap="round"/>
+    <line x1="68" y1="67" x2="88" y2="67" stroke="#1a1a1a" stroke-width="1.1" stroke-linecap="round"/>
+    <ellipse cx="28" cy="66" rx="5" ry="3" fill="#ff8aab" opacity=".55"/>
+    <ellipse cx="72" cy="66" rx="5" ry="3" fill="#ff8aab" opacity=".55"/>
+  </svg>
+</div>
+
+<div class="topbar" id="topbar">
+  <header>
+    <h1>Цветовой круг</h1>
+    <div class="quote-block" id="quoteBlock">
+      <p class="quote-text" id="quoteText"></p>
+      <p class="quote-author" id="quoteAuthor"></p>
+    </div>
+    <div class="header-actions">
+      <button class="theme-btn" id="themeBtn">Тёмная тема</button>
+    </div>
+  </header>
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-tab="picker">Подбор цвета</button>
+    <button class="tab" data-tab="palettes">Готовые палитры</button>
+    <button class="tab" data-tab="light">Влияние света</button>
+  </nav>
+</div>
+
+<main>
+  <!-- ============ ПОДБОР ЦВЕТА ============ -->
+  <section id="tab-picker">
+    <div class="panel controls" style="margin-bottom:18px;">
+      <label for="picker">Выберите цвет:</label>
+      <input type="color" id="picker" value="#3b82f6">
+      <input type="text" id="hexInput" value="#3b82f6" spellcheck="false" maxlength="7">
+      <span class="hint">HEX — можно ввести вручную</span>
+    </div>
+
+    <section class="top-grid" style="margin-bottom:18px;">
+      <div class="panel">
+        <h2>Заданный цвет</h2>
+        <div class="main-swatch" id="mainSwatch"></div>
+        <div class="codes" id="mainCodes"></div>
+      </div>
+      <div class="panel wheel-panel">
+        <h2>Круг</h2>
+        <div class="wheel-wrap"><div class="wheel" id="wheel"></div></div>
+        <p class="wheel-hint">Клик или перетаскивание по кругу —<br>выбрать основной цвет</p>
+        <button class="random-btn" id="randomBtn">Случайный цвет</button>
+      </div>
+    </section>
+
+    <section class="panel" style="margin-bottom:18px;">
+      <h2>История выбора</h2>
+      <div class="history-grid" id="historyGrid"></div>
+    </section>
+
+    <div id="schemes" style="display:flex;flex-direction:column;gap:18px;"></div>
+  </section>
+
+  <!-- ============ ГОТОВЫЕ ПАЛИТРЫ ============ -->
+  <section id="tab-palettes" hidden>
+    <div class="palette-controls">
+      <div class="count-toggle">
+        <button class="count-btn active" data-count="10">10 цветов</button>
+        <button class="count-btn" data-count="15">15 цветов</button>
+      </div>
+    </div>
+    <div id="palettesContainer"></div>
+  </section>
+
+  <!-- ============ ВЛИЯНИЕ СВЕТА ============ -->
+  <section id="tab-light" hidden>
+    <section class="panel" style="margin-bottom:18px;">
+      <h2>Базовый цвет</h2>
+      <div class="light-base-controls">
+        <input type="color" id="lightBasePicker" value="#3b82f6">
+        <input type="text" id="lightBaseHex" value="#3b82f6" spellcheck="false" maxlength="7">
+        <span class="hint">Цвет, который освещается</span>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Типы освещения</h2>
+      <div class="light-grid" id="lightGrid"></div>
+    </section>
+  </section>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   Цветовые преобразования
+   ============================================================ */
+function normalizeHex(hex) {
+  let h = String(hex).trim().replace('#', '');
+  if (h.length === 3) h = h.split('').map(c => c + c).join('');
+  if (!/^[0-9a-fA-F]{6}$/.test(h)) return null;
+  return '#' + h.toLowerCase();
+}
+function hexToRgb(hex) {
+  const n = parseInt(hex.slice(1), 16);
+  return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+}
+function rgbToHex(r, g, b) {
+  const c = v => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, '0');
+  return '#' + c(r) + c(g) + c(b);
+}
+function rgbToHsl(r, g, b) {
+  r /= 255; g /= 255; b /= 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  let h = 0, s = 0;
+  const l = (max + min) / 2;
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+    }
+    h *= 60;
+  }
+  return { h, s: s * 100, l: l * 100 };
+}
+function hslToRgb(h, s, l) {
+  h = ((h % 360) + 360) % 360;
+  s /= 100; l /= 100;
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+  const m = l - c / 2;
+  let r = 0, g = 0, b = 0;
+  if (h < 60)       { r = c; g = x; }
+  else if (h < 120) { r = x; g = c; }
+  else if (h < 180) { g = c; b = x; }
+  else if (h < 240) { g = x; b = c; }
+  else if (h < 300) { r = x; b = c; }
+  else              { r = c; b = x; }
+  return { r: (r + m) * 255, g: (g + m) * 255, b: (b + m) * 255 };
+}
+
+/* ============================================================
+   Схемы, палитры, цитаты
+   ============================================================ */
+const SCHEMES = [
+  { title: 'Противоположные (комплементарные)', angles: [180] },
+  { title: 'Триада',                            angles: [120, 240] },
+  { title: 'Тетрада (квадрат)',                 angles: [90, 180, 270] }
+];
+const SKIN_PALETTE = [
+  '#FFE4D0', '#FAD9C1', '#F5D0B0', '#EFC4A4', '#EAC3A4',
+  '#E3B490', '#DEB08A', '#D09F7A', '#C68863', '#B27A55',
+  '#A06B48', '#96613E', '#7A4E2D', '#5C3A20', '#3D2817'
+];
+const TEN_INDEXES = [0, 2, 3, 5, 7, 8, 10, 11, 13, 14];
+
+const QUOTES = [
+  { text: 'Каждый ребёнок — художник. Проблема в том, как остаться художником, когда вырастешь.', author: 'Пабло Пикассо' },
+  { text: 'Если слышишь внутренний голос «ты не умеешь рисовать» — рисуй, и этот голос замолчит.', author: 'Винсент Ван Гог' },
+  { text: 'Мы не совершаем ошибок, мы просто рисуем счастливые деревца.', author: 'Боб Росс' },
+  { text: 'Творчество требует мужества.', author: 'Анри Матисс' },
+  { text: 'Я видел ангела в мраморе и вырезал его, пока не освободил.', author: 'Микеланджело' },
+  { text: 'Искусство никогда не заканчивается, только оставляется.', author: 'Леонардо да Винчи' },
+  { text: 'Творчество — это интеллект, который развлекается.', author: 'Альберт Эйнштейн' },
+  { text: 'Всякий раз, когда вы рисуете, вы лучше понимаете мир.', author: 'Джон Рёскин' },
+  { text: 'Не бойся совершенства — ты его никогда не достигнешь.', author: 'Сальвадор Дали' },
+  { text: 'Carpe diem. Лови мгновение.', author: '«Общество мёртвых поэтов»' },
+  { text: 'Художник — это тот, кто видит то, что другие только представляют.', author: 'Народная мудрость' },
+  { text: 'Рисование — это способ быть в мире, где всё возможно.', author: 'Аноним' },
+  { text: 'Не думай. Просто рисуй.', author: 'Правило всех художников' },
+  { text: 'Искусство — это ложь, которая помогает нам понять правду.', author: 'Пабло Пикассо' },
+  { text: 'Живопись — это то, что видишь, когда закрываешь глаза и смотришь в темноту.', author: 'Эдгар Дега' },
+  { text: 'Руки сами знают то, чего не знает голова. Доверься им.', author: 'Поль Сезанн' },
+  { text: 'Рисунок — это почерк души.', author: 'Народная мудрость' },
+  { text: 'Художник обязан изобретать — не повторять.', author: 'Василий Кандинский' }
+];
+
+/* ============================================================
+   Пресеты освещения
+   ============================================================ */
+const LIGHT_PRESETS = [
+  { name: 'Естественный солнечный свет', color: [255, 253, 245], intensity: 1.0, note: 'эталон' },
+  { name: 'Пасмурный день',              color: [215, 225, 240], intensity: 0.85 },
+  { name: 'Лампа накаливания',           color: [255, 190, 110], intensity: 1.0 },
+  { name: 'Тёплый LED',                  color: [255, 220, 160], intensity: 1.0 },
+  { name: 'Холодный LED',                color: [200, 220, 255], intensity: 1.0 },
+  { name: 'Люминесцентная лампа',        color: [210, 230, 240], intensity: 0.9 },
+  { name: 'Свеча',                       color: [255, 160, 70],  intensity: 0.8 },
+  { name: 'Закат',                       color: [255, 170, 100], intensity: 0.9 },
+  { name: 'Лунный свет',                 color: [140, 160, 200], intensity: 0.65 },
+  { name: 'Неоновый свет',               color: [200, 100, 255], intensity: 0.9 }
+];
+
+/* ============================================================
+   DOM / состояние
+   ============================================================ */
+const state = {
+  hex: '#3b82f6',
+  activeTab: 'picker',
+  colorCount: 10,
+  lastQuoteIndex: -1
+};
+let colorHistory = [];
+
+const picker      = document.getElementById('picker');
+const hexInput    = document.getElementById('hexInput');
+const mainSwatch  = document.getElementById('mainSwatch');
+const mainCodes   = document.getElementById('mainCodes');
+const wheel       = document.getElementById('wheel');
+const schemesEl   = document.getElementById('schemes');
+const themeBtn    = document.getElementById('themeBtn');
+const randomBtn   = document.getElementById('randomBtn');
+const toastEl     = document.getElementById('toast');
+const topbarEl    = document.getElementById('topbar');
+const palettesContainer = document.getElementById('palettesContainer');
+const kitten      = document.getElementById('kitten');
+const quoteText   = document.getElementById('quoteText');
+const quoteAuthor = document.getElementById('quoteAuthor');
+const historyGrid = document.getElementById('historyGrid');
+
+const lightBasePicker   = document.getElementById('lightBasePicker');
+const lightBaseHex      = document.getElementById('lightBaseHex');
+const lightGrid         = document.getElementById('lightGrid');
+
+/* ============================================================
+   Тост
+   ============================================================ */
+let toastTimer = null;
+function showToast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1800);
+}
+
+/* ============================================================
+   Цитата
+   ============================================================ */
+function setRandomQuote() {
+  if (!QUOTES.length) return;
+  let idx;
+  do {
+    idx = Math.floor(Math.random() * QUOTES.length);
+  } while (idx === state.lastQuoteIndex && QUOTES.length > 1);
+  state.lastQuoteIndex = idx;
+  const q = QUOTES[idx];
+  quoteText.textContent = '«' + q.text + '»';
+  quoteAuthor.textContent = '— ' + q.author;
+}
+
+/* ============================================================
+   Табы
+   ============================================================ */
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => setTab(btn.dataset.tab));
+});
+function setTab(name) {
+  state.activeTab = name;
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.tab === name);
+  });
+  document.getElementById('tab-picker').hidden   = name !== 'picker';
+  document.getElementById('tab-palettes').hidden = name !== 'palettes';
+  document.getElementById('tab-light').hidden    = name !== 'light';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (name === 'light') renderLight();
+}
+
+/* ============================================================
+   ИСТОРИЯ ВЫБОРА
+   ============================================================ */
+const HISTORY_MAX = 10;
+
+function saveHistory() {
+  try { localStorage.setItem('colorwheel-history', JSON.stringify(colorHistory)); } catch (e) {}
+}
+function loadHistory() {
+  try {
+    const raw = localStorage.getItem('colorwheel-history');
+    if (!raw) return;
+    const arr = JSON.parse(raw);
+    if (!Array.isArray(arr)) return;
+    colorHistory = arr
+      .filter(h => typeof h === 'string' && /^#[0-9a-f]{6}$/i.test(h))
+      .map(h => h.toLowerCase())
+      .slice(0, HISTORY_MAX);
+  } catch (e) {}
+}
+function commitToHistory(hex) {
+  const h = normalizeHex(hex);
+  if (!h) return;
+  colorHistory = colorHistory.filter(x => x !== h);
+  colorHistory.unshift(h);
+  if (colorHistory.length > HISTORY_MAX) colorHistory.length = HISTORY_MAX;
+  saveHistory();
+  renderHistory();
+}
+function renderHistory() {
+  historyGrid.innerHTML = '';
+  if (!colorHistory.length) {
+    const empty = document.createElement('span');
+    empty.className = 'history-empty';
+    empty.textContent = 'Пока нет цветов';
+    historyGrid.appendChild(empty);
+    return;
+  }
+  colorHistory.forEach(hex => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'history-item';
+    btn.style.background = hex;
+    btn.dataset.hex = hex;
+    btn.title = hex.toUpperCase() + ' — нажмите, чтобы выбрать';
+    if (hex === state.hex) btn.classList.add('current');
+    btn.addEventListener('click', () => {
+      cancelWheelAnimation();
+      setColor(hex);
+      commitToHistory(hex);
+    });
+    historyGrid.appendChild(btn);
+  });
+}
+function updateHistoryCurrent() {
+  historyGrid.querySelectorAll('.history-item').forEach(item => {
+    item.classList.toggle('current', item.dataset.hex === state.hex);
+  });
+}
+
+/* ============================================================
+   РЕНДЕР основного
+   ============================================================ */
+function render() {
+  const rgb = hexToRgb(state.hex);
+  const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+  const hexUpper = state.hex.toUpperCase();
+  const rgbText  = `${rgb.r}, ${rgb.g}, ${rgb.b}`;
+
+  mainSwatch.style.background = state.hex;
+  mainCodes.innerHTML = `
+    <button class="copy-btn" data-copy="${hexUpper}" title="Скопировать HEX">
+      <span class="k">HEX</span><span>${hexUpper}</span>
+    </button>
+    <button class="copy-btn" data-copy="${rgbText}" title="Скопировать RGB">
+      <span class="k">RGB</span><span>${rgbText}</span>
+    </button>`;
+  mainCodes.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const label = btn.querySelector('.k').textContent;
+      copyText(btn.dataset.copy, label);
+    });
+  });
+
+  const dots = [];
+  if (!flightState) dots.push({ hsl, main: true });
+  SCHEMES.forEach(sc => sc.angles.forEach(a => {
+    dots.push({ hsl: { h: (hsl.h + a) % 360, s: hsl.s, l: hsl.l }, main: false });
+  }));
+  drawWheel(dots);
+
+  schemesEl.innerHTML = '';
+  SCHEMES.forEach(sc => {
+    const section = document.createElement('section');
+    section.className = 'panel';
+    const h2 = document.createElement('h2');
+    h2.textContent = sc.title;
+    section.appendChild(h2);
+    const cards = document.createElement('div');
+    cards.className = 'cards';
+    sc.angles.forEach(angle => {
+      const h = (hsl.h + angle) % 360;
+      const c = hslToRgb(h, hsl.s, hsl.l);
+      const hex = rgbToHex(c.r, c.g, c.b).toUpperCase();
+      const r = Math.round(c.r), g = Math.round(c.g), b = Math.round(c.b);
+      const rgbStr = `${r}, ${g}, ${b}`;
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="color" style="background:${hex}"></div>
+        <div class="meta">
+          <button class="copy-btn" data-copy="${hex}" title="Скопировать HEX">
+            <span class="k">HEX</span><span>${hex}</span>
+          </button>
+          <button class="copy-btn" data-copy="${rgbStr}" title="Скопировать RGB">
+            <span class="k">RGB</span><span>${rgbStr}</span>
+          </button>
+        </div>`;
+      card.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const label = btn.querySelector('.k').textContent;
+          copyText(btn.dataset.copy, label);
+        });
+      });
+      cards.appendChild(card);
+    });
+    section.appendChild(cards);
+    schemesEl.appendChild(section);
+  });
+
+  updateHistoryCurrent();
+}
+
+function drawWheel(dots) {
+  wheel.querySelectorAll('.dot').forEach(d => d.remove());
+  const size = wheel.clientWidth || 230;
+  const R = size / 2;
+  dots.forEach(({ hsl, main }) => {
+    const dist = R * (hsl.s / 100) * 0.92;
+    const rad = hsl.h * Math.PI / 180;
+    const x = Math.sin(rad) * dist;
+    const y = -Math.cos(rad) * dist;
+    const dot = document.createElement('div');
+    dot.className = 'dot' + (main ? ' main' : '');
+    dot.style.background = `hsl(${hsl.h} ${hsl.s}% ${hsl.l}%)`;
+    dot.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
+    wheel.appendChild(dot);
+  });
+}
+
+/* ============================================================
+   Выбор цвета на круге
+   ============================================================ */
+let isWheelDragging = false;
+function pickColorFromWheel(e) {
+  const rect = wheel.getBoundingClientRect();
+  if (!rect.width) return;
+  const cx = rect.width / 2, cy = rect.height / 2, R = rect.width / 2;
+  const dx = (e.clientX - rect.left) - cx;
+  const dy = (e.clientY - rect.top) - cy;
+  const dist = Math.hypot(dx, dy);
+  let hue = Math.atan2(dx, -dy) * 180 / Math.PI;
+  if (hue < 0) hue += 360;
+  const sat = Math.min(100, (dist / (R * 0.92)) * 100);
+  const curRgb = hexToRgb(state.hex);
+  const curHsl = rgbToHsl(curRgb.r, curRgb.g, curRgb.b);
+  let light = curHsl.l;
+  if (light <= 5 || light >= 95) light = 50;
+  const c = hslToRgb(hue, sat, light);
+  setColor(rgbToHex(c.r, c.g, c.b));
+}
+wheel.addEventListener('pointerdown', e => {
+  cancelWheelAnimation();
+  e.preventDefault();
+  isWheelDragging = true;
+  try { wheel.setPointerCapture(e.pointerId); } catch (_) {}
+  pickColorFromWheel(e);
+});
+wheel.addEventListener('pointermove', e => {
+  if (!isWheelDragging) return;
+  pickColorFromWheel(e);
+});
+function endWheelDrag(e) {
+  const wasDragging = isWheelDragging;
+  isWheelDragging = false;
+  try { wheel.releasePointerCapture(e.pointerId); } catch (_) {}
+  if (wasDragging) commitToHistory(state.hex);
+}
+wheel.addEventListener('pointerup', endWheelDrag);
+wheel.addEventListener('pointercancel', endWheelDrag);
+
+/* ============================================================
+   Полёт котёнка
+   ============================================================ */
+let flightState = null;
+let flightToken = 0;
+
+function computeKittenOffset(hsl) {
+  const rect = wheel.getBoundingClientRect();
+  if (!rect.width) return null;
+  const R = rect.width / 2;
+  const cx = rect.left + R, cy = rect.top + R;
+  const dist = R * (hsl.s / 100) * 0.92;
+  const rad = hsl.h * Math.PI / 180;
+  const dotX = cx + Math.sin(rad) * dist;
+  const dotY = cy - Math.cos(rad) * dist;
+  return { dx: dotX - flightState.baseCX, dy: dotY - flightState.baseCY, rot: hsl.h };
+}
+function startKittenFlight() {
+  flightToken++;
+  kitten.classList.remove('flying');
+  kitten.style.transition = 'none';
+  kitten.style.transform = '';
+  void kitten.offsetWidth;
+  const r = kitten.getBoundingClientRect();
+  flightState = { baseCX: r.left + r.width / 2, baseCY: r.top + r.height / 2 };
+  kitten.classList.add('flying');
+  kitten.style.transition = 'transform 0.4s cubic-bezier(.34,1.56,.64,1)';
+  const myToken = flightToken;
+  setTimeout(() => {
+    if (myToken === flightToken && flightState) {
+      kitten.style.transition = 'transform 0.06s linear';
+    }
+  }, 450);
+}
+function updateKittenFlight(hsl) {
+  if (!flightState) return;
+  const t = computeKittenOffset(hsl);
+  if (!t) return;
+  kitten.style.transform = `translate(${t.dx}px, ${t.dy}px) rotate(${t.rot}deg)`;
+}
+function endKittenFlight() {
+  if (!flightState) return;
+  const myToken = ++flightToken;
+  flightState = null;
+  kitten.style.transition = 'transform 0.6s cubic-bezier(.34,1.56,.64,1)';
+  kitten.style.transform = 'translate(0px, 0px) rotate(0deg)';
+  setTimeout(() => {
+    if (myToken !== flightToken) return;
+    kitten.classList.remove('flying');
+    kitten.style.transition = '';
+    kitten.style.transform = '';
+  }, 650);
+}
+
+/* ============================================================
+   Анимация «Случайный цвет» (5 сек)
+   ============================================================ */
+let wheelAnimating = false;
+let wheelAnimToken = 0;
+
+function cancelWheelAnimation() {
+  if (!wheelAnimating) return;
+  wheelAnimToken++;
+  wheelAnimating = false;
+  randomBtn.disabled = false;
+  endKittenFlight();
+  render();
+}
+function animateToRandomColor() {
+  if (wheelAnimating) return;
+  const myToken = ++wheelAnimToken;
+  wheelAnimating = true;
+  randomBtn.disabled = true;
+  const duration = 5000;
+  const startTime = performance.now();
+  const startRgb = hexToRgb(state.hex);
+  const startHsl = rgbToHsl(startRgb.r, startRgb.g, startRgb.b);
+  const targetHue = Math.random() * 360;
+  const targetSat = 40 + Math.random() * 60;
+  let   targetL   = startHsl.l;
+  if (targetL < 25) targetL = 25;
+  if (targetL > 75) targetL = 75;
+  const satFreq = 2 + Math.random() * 2;
+  const satAmp  = 20;
+  let hueDelta = targetHue - startHsl.h;
+  hueDelta = ((hueDelta % 360) + 540) % 360 - 180;
+  const totalHueDelta = hueDelta + 720;
+  const easeInOutCubic = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+  startKittenFlight();
+
+  function step(now) {
+    if (myToken !== wheelAnimToken) return;
+    const t = Math.min(1, (now - startTime) / duration);
+    const e = easeInOutCubic(t);
+    const h = ((startHsl.h + totalHueDelta * e) % 360 + 360) % 360;
+    const baseS = startHsl.s + (targetSat - startHsl.s) * e;
+    const wobble = Math.sin(t * Math.PI * 2 * satFreq) * satAmp * (1 - t);
+    const s = Math.max(40, Math.min(100, baseS + wobble));
+    const l = startHsl.l + (targetL - startHsl.l) * e;
+    const rgb = hslToRgb(h, s, l);
+    state.hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+    picker.value = state.hex;
+    hexInput.value = state.hex;
+    mainSwatch.style.background = state.hex;
+    const dots = [];
+    if (!flightState) dots.push({ hsl: { h, s, l }, main: true });
+    SCHEMES.forEach(sc => sc.angles.forEach(a => {
+      dots.push({ hsl: { h: (h + a) % 360, s, l }, main: false });
+    }));
+    drawWheel(dots);
+    updateKittenFlight({ h, s, l });
+    if (t < 1) {
+      requestAnimationFrame(step);
+    } else {
+      wheelAnimating = false;
+      randomBtn.disabled = false;
+      endKittenFlight();
+      setColor(state.hex, true);
+      commitToHistory(state.hex);
+    }
+  }
+  requestAnimationFrame(step);
+}
+randomBtn.addEventListener('click', animateToRandomColor);
+
+/* ============================================================
+   ПАЛИТРЫ
+   ============================================================ */
+function renderPalettes() {
+  const colors = state.colorCount === 10
+    ? TEN_INDEXES.map(i => SKIN_PALETTE[i])
+    : SKIN_PALETTE;
+  palettesContainer.innerHTML = '';
+  const card = document.createElement('section');
+  card.className = 'palette-card';
+  card.innerHTML = `<h3>Цвета кожи <span class="hint">· ${colors.length}</span></h3><div class="palette-colors"></div>`;
+  const grid = card.querySelector('.palette-colors');
+  colors.forEach(hex => {
+    const rgb = hexToRgb(hex);
+    const rgbStr = `${rgb.r}, ${rgb.g}, ${rgb.b}`;
+    const upperHex = hex.toUpperCase();
+    const item = document.createElement('div');
+    item.className = 'color-item';
+    item.innerHTML = `
+      <div class="color-block" style="background:${hex}" title="Скопировать ${upperHex}"></div>
+      <button class="copy-btn" data-copy="${upperHex}" title="Скопировать HEX">
+        <span class="k">HEX</span><span>${upperHex}</span>
+      </button>
+      <button class="copy-btn" data-copy="${rgbStr}" title="Скопировать RGB">
+        <span class="k">RGB</span><span>${rgbStr}</span>
+      </button>`;
+    item.querySelector('.color-block').addEventListener('click', () => {
+      copyText(upperHex, 'HEX');
+    });
+    item.querySelectorAll('.copy-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const label = btn.querySelector('.k').textContent;
+        copyText(btn.dataset.copy, label);
+      });
+    });
+    grid.appendChild(item);
+  });
+  palettesContainer.appendChild(card);
+}
+document.querySelectorAll('.count-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.count-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.colorCount = parseInt(btn.dataset.count, 10);
+    renderPalettes();
+  });
+});
+
+/* ============================================================
+   ВЛИЯНИЕ СВЕТА
+   ============================================================ */
+function applyLightColor(baseRgb, lightRgb, intensity) {
+  const [lr, lg, lb] = lightRgb;
+  const r = Math.round(Math.min(255, baseRgb.r * (lr / 255) * intensity));
+  const g = Math.round(Math.min(255, baseRgb.g * (lg / 255) * intensity));
+  const b = Math.round(Math.min(255, baseRgb.b * (lb / 255) * intensity));
+  return { r, g, b };
+}
+
+function lightCardMarkup(baseHex, lightRgb, intensity, name, note) {
+  const baseRgb = hexToRgb(baseHex);
+  const resultRgb = applyLightColor(baseRgb, lightRgb, intensity);
+  const resultHex = rgbToHex(resultRgb.r, resultRgb.g, resultRgb.b).toUpperCase();
+  const resultRgbStr = `${resultRgb.r}, ${resultRgb.g}, ${resultRgb.b}`;
+  return `
+    <div class="light-card">
+      <div class="light-name">
+        <span>${name}</span>
+        ${note ? `<span class="light-note">${note}</span>` : ''}
+      </div>
+      <div class="light-preview">
+        <div class="light-before" style="background:${baseHex}"></div>
+        <div class="light-after" style="background:${resultHex}"></div>
+      </div>
+      <div class="light-codes">
+        <button class="copy-btn" data-copy="${resultHex}" title="Скопировать HEX">
+          <span class="k">HEX</span><span>${resultHex}</span>
+        </button>
+        <button class="copy-btn" data-copy="${resultRgbStr}" title="Скопировать RGB">
+          <span class="k">RGB</span><span>${resultRgbStr}</span>
+        </button>
+      </div>
+    </div>`;
+}
+
+function renderLight() {
+  lightGrid.innerHTML = LIGHT_PRESETS.map(p =>
+    lightCardMarkup(state.hex, p.color, p.intensity, p.name, p.note)
+  ).join('');
+}
+
+// делегирование копирования для light-карточек
+lightGrid.addEventListener('click', e => {
+  const btn = e.target.closest('.copy-btn');
+  if (!btn) return;
+  const label = btn.querySelector('.k').textContent;
+  copyText(btn.dataset.copy, label);
+});
+
+// обработчики ввода базового цвета для свет-секции
+lightBasePicker.addEventListener('input', e => setColor(e.target.value));
+lightBaseHex.addEventListener('input', e => {
+  const v = normalizeHex(e.target.value);
+  if (v) setColor(v, false);
+});
+lightBaseHex.addEventListener('blur', e => {
+  const v = normalizeHex(e.target.value);
+  if (!v) e.target.value = state.hex;
+});
+
+/* ============================================================
+   Установка цвета / копирование
+   ============================================================ */
+function setColor(hex, syncInput = true) {
+  const normalized = normalizeHex(hex);
+  if (!normalized) return;
+  state.hex = normalized;
+
+  if (syncInput) {
+    hexInput.value = normalized;
+    lightBaseHex.value = normalized;
+  }
+  picker.value = normalized;
+  lightBasePicker.value = normalized;
+
+  render();
+  renderLight();
+}
+
+function copyText(text, label) {
+  const okMsg = 'Скопировано ' + (label ? label + ': ' : '') + text;
+  const failMsg = 'Не удалось скопировать';
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text)
+      .then(() => showToast(okMsg))
+      .catch(() => showToast(failMsg));
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+    showToast(ok ? okMsg : failMsg);
+  }
+}
+
+/* ============================================================
+   КОТЁНОК
+   ============================================================ */
+let audioCtx = null;
+function playMeow() {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(560, now);
+    osc.frequency.linearRampToValueAtTime(900, now + 0.08);
+    osc.frequency.exponentialRampToValueAtTime(520, now + 0.32);
+    osc.frequency.exponentialRampToValueAtTime(340, now + 0.62);
+    const lfo = audioCtx.createOscillator();
+    lfo.type = 'sine'; lfo.frequency.value = 13;
+    const lfoGain = audioCtx.createGain();
+    lfoGain.gain.value = 40;
+    lfo.connect(lfoGain); lfoGain.connect(osc.frequency);
+    const gain = audioCtx.createGain();
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.linearRampToValueAtTime(0.28, now + 0.06);
+    gain.gain.linearRampToValueAtTime(0.22, now + 0.38);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.7);
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = 'lowpass'; filter.Q.value = 4;
+    filter.frequency.setValueAtTime(2200, now);
+    filter.frequency.exponentialRampToValueAtTime(700, now + 0.6);
+    osc.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
+    osc.start(now); lfo.start(now);
+    osc.stop(now + 0.72); lfo.stop(now + 0.72);
+  } catch (e) { console.warn('Звук недоступен:', e); }
+}
+function setRandomKittenPosition() {
+  if (flightState) return;
+  const side = Math.random() < 0.5 ? 'left' : 'right';
+  const minTop = 150;
+  const maxTop = Math.max(minTop + 80, window.innerHeight - 140);
+  const top = minTop + Math.random() * (maxTop - minTop);
+  kitten.style.top = top + 'px';
+  kitten.style[side] = '20px';
+  kitten.style[side === 'left' ? 'right' : 'left'] = 'auto';
+}
+function showMeowBubble() {
+  const existing = kitten.querySelector('.meow-bubble');
+  if (existing) existing.remove();
+  const bubble = document.createElement('div');
+  bubble.className = 'meow-bubble';
+  bubble.textContent = 'Мяу!';
+  kitten.appendChild(bubble);
+  setTimeout(() => bubble.remove(), 1200);
+}
+kitten.addEventListener('click', e => {
+  e.stopPropagation();
+  if (flightState) return;
+  playMeow();
+  showMeowBubble();
+  setTimeout(setRandomKittenPosition, 350);
+});
+
+/* ============================================================
+   Тема
+   ============================================================ */
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  themeBtn.textContent = theme === 'dark' ? 'Светлая тема' : 'Тёмная тема';
+  try { localStorage.setItem('colorwheel-theme', theme); } catch (e) {}
+}
+themeBtn.addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme');
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+});
+
+/* ============================================================
+   События ввода цвета (главная вкладка)
+   ============================================================ */
+picker.addEventListener('input', e => {
+  cancelWheelAnimation();
+  setColor(e.target.value);
+});
+picker.addEventListener('change', e => {
+  commitToHistory(e.target.value);
+});
+hexInput.addEventListener('input', e => {
+  const v = normalizeHex(e.target.value);
+  if (v) { cancelWheelAnimation(); setColor(v, false); }
+});
+hexInput.addEventListener('blur', e => {
+  const v = normalizeHex(e.target.value);
+  if (v) { setColor(v, true); commitToHistory(v); }
+  else  { e.target.value = state.hex; }
+});
+
+window.addEventListener('resize', () => {
+  render();
+  updateTopbarHeight();
+});
+
+function updateTopbarHeight() {
+  const h = topbarEl.offsetHeight;
+  document.documentElement.style.setProperty('--topbar-h', h + 'px');
+}
+
+/* ============================================================
+   Старт
+   ============================================================ */
+(function init() {
+  let saved = 'light';
+  try { saved = localStorage.getItem('colorwheel-theme') || 'light'; } catch (e) {}
+  applyTheme(saved);
+  loadHistory();
+  setRandomQuote();
+  setColor('#3b82f6');
+  renderPalettes();
+  updateTopbarHeight();
+  setRandomKittenPosition();
+  if (!colorHistory.length) {
+    commitToHistory(state.hex);
+  } else {
+    renderHistory();
+  }
+})();
+</script>
+</body>
+</html>
