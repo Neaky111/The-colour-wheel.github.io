@@ -9,6 +9,7 @@
     --bg: #f4f6f9; --panel: #ffffff; --text: #1c1e21; --muted: #6b7280;
     --border: #e3e6eb; --card-bg: #f7f8fa;
     --shadow: 0 4px 18px rgba(0,0,0,.07); --accent: #3b82f6;
+    --fs: 1;
   }
   [data-theme="dark"] {
     --bg: #121418; --panel: #1c1f25; --text: #e8eaed; --muted: #98a0ab;
@@ -40,12 +41,14 @@
   }
   header {
     display: grid; grid-template-columns: auto 1fr auto;
-    align-items: center; gap: 18px;
+    align-items: center; gap: 14px;
     padding: 10px 14px;
     border-bottom: 1px solid var(--border);
   }
   header h1 {
-    margin: 0; font-size: 17px; font-weight: 650;
+    margin: 0;
+    font-size: calc(17px * var(--fs));
+    font-weight: 650;
     letter-spacing: .2px; white-space: nowrap;
   }
 
@@ -58,8 +61,9 @@
   }
   .quote-block.special:hover { background: rgba(59, 130, 246, .14); }
   .quote-text {
-    margin: 0; font-size: 12.5px; line-height: 1.3; font-style: italic;
-    color: var(--text);
+    margin: 0;
+    font-size: calc(12.5px * var(--fs));
+    line-height: 1.3; font-style: italic; color: var(--text);
     overflow: hidden; display: -webkit-box;
     -webkit-line-clamp: 2; -webkit-box-orient: vertical;
   }
@@ -72,15 +76,47 @@
   }
   .quote-block.special:hover .quote-text { text-decoration-style: solid; }
   .quote-author {
-    margin: 1px 0 0; font-size: 10.5px; font-weight: 600;
+    margin: 1px 0 0;
+    font-size: calc(10.5px * var(--fs));
+    font-weight: 600;
     letter-spacing: .4px; color: var(--muted); text-transform: uppercase;
   }
   .quote-block.special .quote-author { color: var(--accent); }
 
-  .header-actions { display: flex; gap: 8px; align-items: center; justify-self: end; }
+  .header-actions {
+    display: flex; gap: 8px; align-items: center; justify-self: end;
+    flex-wrap: wrap; justify-content: flex-end;
+  }
+
+  .fs-group {
+    display: inline-flex;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--card-bg);
+    flex-shrink: 0;
+  }
+  .fs-btn {
+    padding: 7px 10px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .fs-btn + .fs-btn { border-left: 1px solid var(--border); }
+  .fs-btn:hover { background: var(--border); }
+  .fs-btn:active { transform: scale(.94); }
+
   .theme-btn {
     display: inline-flex; align-items: center; gap: 8px;
-    padding: 7px 14px; font-size: 13px; font-family: inherit; font-weight: 500;
+    padding: 7px 14px;
+    font-size: calc(13px * var(--fs));
+    font-family: inherit; font-weight: 500;
     color: var(--text); background: var(--card-bg); border: 1px solid var(--border);
     border-radius: 8px; cursor: pointer;
     transition: background .2s, border-color .2s, transform .1s;
@@ -100,15 +136,19 @@
       grid-template-areas: "title actions" "quote quote"; row-gap: 6px;
     }
     header h1 { grid-area: title; }
-    .header-actions { grid-area: actions; justify-self: end; }
+    .header-actions { grid-area: actions; gap: 6px; }
     .quote-block { grid-area: quote; }
+    .theme-btn { padding: 6px 10px; }
+    .fs-btn { padding: 6px 8px; }
   }
 
   .tabs { display: flex; gap: 2px; padding: 0 10px; flex-wrap: wrap; }
   .tab {
     padding: 9px 16px; background: transparent; border: none;
     border-bottom: 3px solid transparent; color: var(--muted);
-    font: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+    font: inherit;
+    font-size: calc(13px * var(--fs));
+    font-weight: 600; cursor: pointer;
     transition: color .2s, border-color .2s;
   }
   .tab:hover { color: var(--text); }
@@ -129,12 +169,9 @@
     display: flex; flex-direction: column;
     gap: 10px; flex: 1; min-height: 0;
   }
-
-  /* Палитры и Свет: скролл по всей секции */
   #tab-palettes:not([hidden]),
   #tab-light:not([hidden]) {
-    overflow-y: auto;
-    padding-right: 4px;
+    overflow-y: auto; padding-right: 4px;
   }
   #tab-palettes > *,
   #tab-light > * { flex-shrink: 0; }
@@ -142,14 +179,10 @@
   @media (max-width: 700px) {
     #tab-picker:not([hidden]),
     #tab-palettes:not([hidden]),
-    #tab-light:not([hidden]) {
-      flex: none; min-height: auto;
-    }
+    #tab-light:not([hidden]) { flex: none; min-height: auto; }
     #tab-palettes:not([hidden]),
     #tab-light:not([hidden]) { overflow: visible; }
-    #tab-picker .top-grid {
-      flex: none; min-height: auto; overflow: visible;
-    }
+    #tab-picker .top-grid { flex: none; min-height: auto; overflow: visible; }
   }
 
   .panel {
@@ -158,15 +191,17 @@
     transition: background .25s, border-color .25s;
   }
   .panel h2 {
-    margin: 0 0 10px; font-size: 12px; font-weight: 600;
+    margin: 0 0 10px;
+    font-size: calc(12px * var(--fs));
+    font-weight: 600;
     color: var(--muted); text-transform: uppercase; letter-spacing: .5px;
   }
 
   .color-panel { padding: 10px 12px; }
-  .color-panel h2 { font-size: 11px; margin: 0 0 6px; }
+  .color-panel h2 { font-size: calc(11px * var(--fs)); margin: 0 0 6px; }
 
   .controls { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
-  .controls label { font-size: 13px; font-weight: 500; }
+  .controls label { font-size: calc(13px * var(--fs)); font-weight: 500; }
 
   input[type="color"] {
     width: 50px; height: 40px; padding: 0;
@@ -179,13 +214,14 @@
   #hexInput, #lightBaseHex {
     width: 120px; padding: 9px 11px;
     font-family: ui-monospace, "SF Mono", Consolas, monospace;
-    font-size: 14px; letter-spacing: .5px; color: var(--text);
+    font-size: calc(14px * var(--fs));
+    letter-spacing: .5px; color: var(--text);
     background: var(--card-bg); border: 1px solid var(--border);
     border-radius: 8px; outline: none; transition: border-color .2s;
   }
   #hexInput:focus, #lightBaseHex:focus { border-color: var(--accent); }
 
-  .hint { font-size: 11.5px; color: var(--muted); }
+  .hint { font-size: calc(11.5px * var(--fs)); color: var(--muted); }
 
   #tab-picker .controls-panel { flex-shrink: 0; }
   #tab-picker .top-grid { flex: 1; min-height: 0; overflow-y: auto; }
@@ -194,16 +230,16 @@
   .top-grid {
     display: grid;
     grid-template-columns:
-      minmax(120px, 0.4fr)
+      minmax(140px, 0.45fr)
       clamp(200px, 22vh + 30px, 240px)
-      minmax(420px, 1.6fr);
+      minmax(440px, 1.55fr);
     gap: 12px; align-items: start;
   }
   @media (max-width: 900px) { .top-grid { grid-template-columns: 1fr auto; } }
   @media (max-width: 760px) { .top-grid { grid-template-columns: 1fr; } }
 
   .main-swatch {
-    height: clamp(55px, 9vh, 85px);
+    height: clamp(48px, 7vh, 70px);
     border-radius: 8px; border: 1px solid var(--border);
     transition: background .2s;
   }
@@ -211,20 +247,30 @@
   .copy-btn {
     display: flex; align-items: baseline; gap: 10px; width: 100%;
     padding: 4px 8px; background: transparent; border: 1px solid transparent;
-    border-radius: 6px; font-family: ui-monospace, "SF Mono", Consolas, monospace;
-    font-size: 13px; color: var(--text); text-align: left;
+    border-radius: 6px;
+    font-family: ui-monospace, "SF Mono", Consolas, monospace;
+    font-size: calc(13px * var(--fs));
+    color: var(--text); text-align: left;
     cursor: pointer; transition: background .15s, border-color .15s, transform .08s;
   }
   .copy-btn:hover { background: var(--card-bg); border-color: var(--accent); }
   .copy-btn:active { transform: scale(.98); }
   .copy-btn .k {
-    color: var(--muted); font-weight: 700; font-size: 9.5px;
-    letter-spacing: .6px; min-width: 28px;
+    color: var(--muted); font-weight: 700;
+    font-size: calc(10px * var(--fs));
+    letter-spacing: .6px; min-width: 32px;
   }
 
-  .codes { margin-top: 4px; display: flex; flex-direction: column; gap: 0; }
-  .codes .copy-btn { font-size: 11px; padding: 2px 5px; gap: 6px; }
-  .codes .copy-btn .k { font-size: 8.5px; min-width: 22px; letter-spacing: .3px; }
+  .codes { margin-top: 4px; display: flex; flex-direction: column; gap: 1px; }
+  .codes .copy-btn {
+    font-size: calc(14px * var(--fs));
+    padding: 3px 6px;
+    gap: 6px;
+  }
+  .codes .copy-btn .k {
+    font-size: calc(10.5px * var(--fs));
+    min-width: 28px;
+  }
 
   .wheel-panel { display: flex; flex-direction: column; }
   .wheel-wrap { display: flex; justify-content: center; }
@@ -251,13 +297,16 @@
   @keyframes pop { from { opacity: 0; } to { opacity: 1; } }
 
   .wheel-hint {
-    margin: 8px 0 0; text-align: center; font-size: 11px;
+    margin: 8px 0 0; text-align: center;
+    font-size: calc(11px * var(--fs));
     color: var(--muted); line-height: 1.35;
   }
 
   .random-btn {
     margin-top: 8px; padding: 9px 14px; width: 100%;
-    font: inherit; font-size: 13px; font-weight: 600; letter-spacing: .2px;
+    font: inherit;
+    font-size: calc(13px * var(--fs));
+    font-weight: 600; letter-spacing: .2px;
     color: #fff; background: var(--accent); border: 1px solid var(--accent);
     border-radius: 8px; cursor: pointer;
     transition: opacity .2s, transform .1s;
@@ -282,8 +331,12 @@
   .history-item:active { transform: scale(.96); }
   .history-item:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .history-item.current { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
-  .history-empty { font-size: 12px; color: var(--muted); font-style: italic; }
+  .history-empty {
+    font-size: calc(12px * var(--fs));
+    color: var(--muted); font-style: italic;
+  }
 
+  /* --- Схемы (противоположные / триада / тетрада) --- */
   #schemes {
     display: flex; flex-direction: column; gap: 8px;
     min-height: 0; padding-right: 2px;
@@ -292,9 +345,11 @@
     padding: 10px 12px; box-shadow: none;
     background: var(--card-bg); flex-shrink: 0;
   }
-  #schemes > .panel h2 { font-size: 12px; margin: 0 0 8px; }
+  #schemes > .panel h2 { font-size: calc(12px * var(--fs)); margin: 0 0 8px; }
   #schemes .cards {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+    gap: 10px;
   }
   #schemes .card {
     background: var(--panel); border: 1px solid var(--border);
@@ -302,17 +357,26 @@
     transition: border-color .15s;
   }
   #schemes .card:hover { border-color: var(--accent); }
-  #schemes .card .color { height: 56px; }
-  #schemes .card .meta { padding: 4px 5px; gap: 2px; display: flex; flex-direction: column; }
-  #schemes .card .copy-btn { font-size: 11px; padding: 3px 5px; gap: 5px; }
-  #schemes .card .copy-btn .k { font-size: 9px; min-width: 24px; letter-spacing: .3px; }
+  #schemes .card .color { height: 60px; }
+  #schemes .card .meta {
+    padding: 5px 6px; gap: 3px;
+    display: flex; flex-direction: column;
+  }
+  #schemes .card .copy-btn {
+    font-size: calc(13px * var(--fs));
+    padding: 3px 5px; gap: 6px;
+  }
+  #schemes .card .copy-btn .k {
+    font-size: calc(10px * var(--fs));
+    min-width: 32px; letter-spacing: .3px;
+  }
   #schemes .card .copy-btn span:last-child {
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
 
   @media (max-width: 900px) {
     #schemes { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; }
-    #schemes > .panel { flex: 1 1 240px; flex-shrink: 0; }
+    #schemes > .panel { flex: 1 1 300px; flex-shrink: 0; }
   }
   @media (max-width: 760px) {
     #schemes { flex-direction: column; }
@@ -326,7 +390,9 @@
   }
   .count-toggle { display: flex; gap: 6px; flex-wrap: wrap; }
   .count-btn {
-    padding: 7px 14px; font: inherit; font-size: 12.5px; font-weight: 500;
+    padding: 7px 14px; font: inherit;
+    font-size: calc(12.5px * var(--fs));
+    font-weight: 500;
     color: var(--text); background: var(--card-bg);
     border: 1px solid var(--border); border-radius: 18px; cursor: pointer;
     transition: background .2s, border-color .2s, color .2s;
@@ -339,9 +405,15 @@
     border-radius: 14px; padding: 14px 16px; box-shadow: var(--shadow);
     margin-bottom: 12px;
   }
-  .palette-card h3 { margin: 0 0 10px; font-size: 14px; font-weight: 600; }
+  .palette-card h3 {
+    margin: 0 0 10px;
+    font-size: calc(14px * var(--fs));
+    font-weight: 600;
+  }
   .palette-colors {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 8px;
   }
   .color-item { display: flex; flex-direction: column; gap: 3px; }
   .color-block {
@@ -350,11 +422,18 @@
   }
   .color-block:hover { transform: translateY(-2px); }
   .color-block:active { transform: scale(.98); }
-  .color-item .copy-btn { font-size: 10px; padding: 2px 4px; gap: 4px; border-radius: 5px; }
-  .color-item .copy-btn .k { font-size: 8px; min-width: 20px; }
-  .color-item .copy-btn span:last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .color-item .copy-btn {
+    font-size: calc(11.5px * var(--fs));
+    padding: 2px 5px; gap: 4px; border-radius: 5px;
+  }
+  .color-item .copy-btn .k {
+    font-size: calc(9px * var(--fs));
+    min-width: 22px;
+  }
+  .color-item .copy-btn span:last-child {
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
 
-  /* ---------- Мои палитры ---------- */
   .custom-create-row {
     display: flex; gap: 8px; flex-wrap: wrap;
     align-items: center; margin-bottom: 14px;
@@ -362,68 +441,57 @@
   #newPaletteName {
     flex: 1; min-width: 160px;
     padding: 9px 11px;
-    font-family: inherit; font-size: 13px;
-    color: var(--text);
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    outline: none;
-    transition: border-color .2s;
+    font-family: inherit;
+    font-size: calc(13px * var(--fs));
+    color: var(--text); background: var(--card-bg);
+    border: 1px solid var(--border); border-radius: 8px;
+    outline: none; transition: border-color .2s;
   }
   #newPaletteName:focus { border-color: var(--accent); }
   #createPaletteBtn {
     padding: 9px 16px;
-    font: inherit; font-size: 13px; font-weight: 600;
-    color: #fff;
-    background: var(--accent);
-    border: 1px solid var(--accent);
-    border-radius: 8px;
-    cursor: pointer;
+    font: inherit;
+    font-size: calc(13px * var(--fs));
+    font-weight: 600;
+    color: #fff; background: var(--accent);
+    border: 1px solid var(--accent); border-radius: 8px; cursor: pointer;
     transition: opacity .2s, transform .1s;
   }
   #createPaletteBtn:hover { opacity: .92; }
   #createPaletteBtn:active { transform: scale(.97); }
 
   .custom-empty {
-    font-size: 13px; font-style: italic; color: var(--muted);
+    font-size: calc(13px * var(--fs));
+    font-style: italic; color: var(--muted);
     text-align: center; padding: 14px 0;
   }
-
   .palette-header {
     display: flex; justify-content: space-between; align-items: center;
     gap: 10px; margin-bottom: 10px;
   }
   .palette-header h3 { margin: 0; }
-  .palette-header h3 .hint { font-size: 11px; margin-left: 4px; }
+  .palette-header h3 .hint { font-size: calc(11px * var(--fs)); margin-left: 4px; }
   .delete-palette-btn {
     width: 26px; height: 26px; padding: 0;
-    border-radius: 50%;
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    font-size: 14px; line-height: 1;
-    cursor: pointer;
+    border-radius: 50%; background: transparent;
+    border: 1px solid var(--border); color: var(--muted);
+    font-size: 14px; line-height: 1; cursor: pointer;
     transition: background .15s, color .15s, border-color .15s;
     display: inline-flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
   }
-  .delete-palette-btn:hover {
-    background: #ef4444; color: #fff; border-color: #ef4444;
-  }
-
+  .delete-palette-btn:hover { background: #ef4444; color: #fff; border-color: #ef4444; }
   .color-item.custom { position: relative; }
   .remove-color-btn {
-    position: absolute;
-    top: -4px; right: -4px;
+    position: absolute; top: -4px; right: -4px;
     width: 18px; height: 18px; padding: 0;
-    border-radius: 50%;
-    background: #ef4444; color: #fff;
+    border-radius: 50%; background: #ef4444; color: #fff;
     border: 2px solid var(--panel);
     font-size: 11px; line-height: 1; font-weight: 700;
     cursor: pointer;
     display: inline-flex; align-items: center; justify-content: center;
     box-shadow: 0 1px 4px rgba(0,0,0,.25);
-    transition: transform .1s;
-    z-index: 2;
+    transition: transform .1s; z-index: 2;
   }
   .remove-color-btn:hover { transform: scale(1.15); }
 
@@ -432,24 +500,22 @@
     margin-top: 12px; padding-top: 12px;
     border-top: 1px dashed var(--border);
   }
-  .add-color-picker {
-    width: 42px; height: 34px;
-  }
+  .add-color-picker { width: 42px; height: 34px; }
   .add-color-hex {
-    flex: 1; min-width: 90px;
-    padding: 7px 10px;
+    flex: 1; min-width: 90px; padding: 7px 10px;
     font-family: ui-monospace, "SF Mono", Consolas, monospace;
-    font-size: 12.5px; letter-spacing: .3px;
-    color: var(--text);
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 6px; outline: none;
+    font-size: calc(12.5px * var(--fs));
+    letter-spacing: .3px;
+    color: var(--text); background: var(--card-bg);
+    border: 1px solid var(--border); border-radius: 6px; outline: none;
     transition: border-color .2s;
   }
   .add-color-hex:focus { border-color: var(--accent); }
   .add-color-btn {
     padding: 7px 12px;
-    font: inherit; font-size: 12px; font-weight: 600;
+    font: inherit;
+    font-size: calc(12px * var(--fs));
+    font-weight: 600;
     color: #fff; background: var(--accent);
     border: 1px solid var(--accent);
     border-radius: 6px; cursor: pointer;
@@ -459,12 +525,20 @@
   .add-color-btn:hover { opacity: .92; }
   .add-color-btn:active { transform: scale(.97); }
 
-  .light-base-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-  .light-base-controls label { font-size: 13px; font-weight: 500; }
-  #lightBaseHex { width: 110px; padding: 8px 10px; font-size: 13px; }
+  /* --- Влияние света --- */
+  .light-base-controls {
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+  }
+  .light-base-controls label {
+    font-size: calc(13px * var(--fs));
+    font-weight: 500;
+  }
+  #lightBaseHex { width: 110px; padding: 8px 10px; font-size: calc(13px * var(--fs)); }
 
   .light-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 10px;
   }
   .light-card {
     background: var(--card-bg); border: 1px solid var(--border);
@@ -473,12 +547,15 @@
   }
   .light-card:hover { border-color: var(--accent); }
   .light-name {
-    padding: 7px 10px; font-size: 12px; font-weight: 600; color: var(--text);
+    padding: 7px 10px;
+    font-size: calc(12px * var(--fs));
+    font-weight: 600; color: var(--text);
     border-bottom: 1px solid var(--border);
     display: flex; justify-content: space-between; align-items: center; gap: 6px;
   }
   .light-note {
-    font-size: 9px; font-weight: 600; color: var(--muted);
+    font-size: calc(9px * var(--fs));
+    font-weight: 600; color: var(--muted);
     text-transform: uppercase; letter-spacing: .3px;
   }
   .light-preview { display: flex; height: 60px; position: relative; }
@@ -496,14 +573,21 @@
     padding: 1px 4px; border-radius: 2px;
     font-weight: 700; text-transform: uppercase;
   }
-  .light-codes { padding: 3px; border-top: 1px solid var(--border); }
-  .light-codes .copy-btn { font-size: 10px; padding: 2px 5px; gap: 4px; }
-  .light-codes .copy-btn .k { font-size: 8px; min-width: 20px; }
+  .light-codes { padding: 4px; border-top: 1px solid var(--border); }
+  .light-codes .copy-btn {
+    font-size: calc(12px * var(--fs));
+    padding: 3px 5px; gap: 4px;
+  }
+  .light-codes .copy-btn .k {
+    font-size: calc(9.5px * var(--fs));
+    min-width: 24px;
+  }
 
   .toast {
     position: fixed; left: 50%; bottom: 20px; transform: translate(-50%, 20px);
     padding: 9px 16px; border-radius: 8px; background: #222; color: #fff;
-    font-size: 13px; opacity: 0; pointer-events: none;
+    font-size: calc(13px * var(--fs));
+    opacity: 0; pointer-events: none;
     transition: opacity .2s, transform .2s; z-index: 100; max-width: 90vw;
   }
   .toast.show { opacity: 1; transform: translate(-50%, 0); }
@@ -525,6 +609,11 @@
       <p class="quote-author" id="quoteAuthor"></p>
     </div>
     <div class="header-actions">
+      <div class="fs-group" role="group" aria-label="Размер шрифта">
+        <button class="fs-btn" id="fsDec" title="Уменьшить шрифт" aria-label="Уменьшить шрифт">A−</button>
+        <button class="fs-btn" id="fsReset" title="Сбросить к 100%" aria-label="Сбросить размер шрифта">A</button>
+        <button class="fs-btn" id="fsInc" title="Увеличить шрифт" aria-label="Увеличить шрифт">A+</button>
+      </div>
       <button class="theme-btn" id="themeBtn">Тёмная тема</button>
     </div>
   </header>
@@ -604,6 +693,35 @@
 <canvas id="confettiCanvas"></canvas>
 
 <script>
+/* ============================================================
+   РАЗМЕР ШРИФТА
+   ============================================================ */
+const FS_KEY = 'colorwheel-font-scale';
+const FS_MIN = 0.85;
+const FS_MAX = 1.6;
+const FS_STEP = 0.1;
+let fontSizeScale = 1.0;
+
+function applyFontScale(scale) {
+  fontSizeScale = Math.round(Math.max(FS_MIN, Math.min(FS_MAX, scale)) * 100) / 100;
+  document.documentElement.style.setProperty('--fs', fontSizeScale);
+  const pct = Math.round(fontSizeScale * 100) + '%';
+  const resetBtn = document.getElementById('fsReset');
+  if (resetBtn) resetBtn.title = 'Размер шрифта: ' + pct + ' (сбросить к 100%)';
+  try { localStorage.setItem(FS_KEY, String(fontSizeScale)); } catch (e) {}
+}
+function loadFontScale() {
+  let val = 1.0;
+  try {
+    const raw = localStorage.getItem(FS_KEY);
+    if (raw) {
+      const parsed = parseFloat(raw);
+      if (!isNaN(parsed)) val = parsed;
+    }
+  } catch (e) {}
+  applyFontScale(val);
+}
+
 /* ============================================================
    Цветовые преобразования
    ============================================================ */
@@ -1161,7 +1279,6 @@ document.querySelectorAll('.count-btn').forEach(btn => {
    МОИ ПАЛИТРЫ
    ============================================================ */
 const CUSTOM_PALETTES_KEY = 'colorwheel-custom-palettes';
-
 function loadCustomPalettes() {
   try {
     const raw = localStorage.getItem(CUSTOM_PALETTES_KEY);
@@ -1179,24 +1296,15 @@ function loadCustomPalettes() {
       }));
   } catch (e) {}
 }
-
 function saveCustomPalettes() {
   try { localStorage.setItem(CUSTOM_PALETTES_KEY, JSON.stringify(customPalettes)); } catch (e) {}
 }
-
 function makeId() {
-  if (window.crypto && typeof window.crypto.randomUUID === 'function') {
-    return window.crypto.randomUUID();
-  }
+  if (window.crypto && typeof window.crypto.randomUUID === 'function') return window.crypto.randomUUID();
   return 'p-' + Date.now() + '-' + Math.random().toString(36).slice(2, 9);
 }
-
 function createCustomPalette(name, initialColor) {
-  const pal = {
-    id: makeId(),
-    name: (name || 'Без названия').slice(0, 40),
-    colors: []
-  };
+  const pal = { id: makeId(), name: (name || 'Без названия').slice(0, 40), colors: [] };
   if (initialColor) {
     const c = normalizeHex(initialColor);
     if (c) pal.colors.push(c);
@@ -1206,13 +1314,11 @@ function createCustomPalette(name, initialColor) {
   renderCustomPalettes();
   return pal;
 }
-
 function deleteCustomPalette(id) {
   customPalettes = customPalettes.filter(p => p.id !== id);
   saveCustomPalettes();
   renderCustomPalettes();
 }
-
 function addColorToPalette(id, hex) {
   const normalized = normalizeHex(hex);
   if (!normalized) { showToast('Введите корректный HEX'); return false; }
@@ -1231,7 +1337,6 @@ function addColorToPalette(id, hex) {
   renderCustomPalettes();
   return true;
 }
-
 function removeColorFromPalette(id, hex) {
   const pal = customPalettes.find(p => p.id === id);
   if (!pal) return;
@@ -1239,10 +1344,8 @@ function removeColorFromPalette(id, hex) {
   saveCustomPalettes();
   renderCustomPalettes();
 }
-
 function renderCustomPalettes() {
   customPalettesList.innerHTML = '';
-
   if (!customPalettes.length) {
     const empty = document.createElement('div');
     empty.className = 'custom-empty';
@@ -1250,12 +1353,9 @@ function renderCustomPalettes() {
     customPalettesList.appendChild(empty);
     return;
   }
-
   customPalettes.forEach(pal => {
     const card = document.createElement('section');
     card.className = 'palette-card';
-    card.dataset.paletteId = pal.id;
-
     const header = document.createElement('div');
     header.className = 'palette-header';
     header.innerHTML = `
@@ -1265,16 +1365,13 @@ function renderCustomPalettes() {
 
     const grid = document.createElement('div');
     grid.className = 'palette-colors';
-
     pal.colors.forEach(hex => {
       const rgb = hexToRgb(hex);
       const rgbStr = `${rgb.r}, ${rgb.g}, ${rgb.b}`;
       const hsvStr = formatHsv(rgb);
       const upperHex = hex.toUpperCase();
-
       const item = document.createElement('div');
       item.className = 'color-item custom';
-      item.dataset.paletteId = pal.id;
       item.dataset.hex = hex;
       item.innerHTML = `
         <div class="color-block" style="background:${hex}" title="${upperHex}"></div>
@@ -1290,13 +1387,10 @@ function renderCustomPalettes() {
         </button>`;
       grid.appendChild(item);
     });
-
     card.appendChild(grid);
 
-    // Строка добавления цвета
     const addRow = document.createElement('div');
     addRow.className = 'add-color-row';
-    addRow.dataset.paletteId = pal.id;
     const presetHex = pal.colors.length ? pal.colors[pal.colors.length - 1] : state.hex;
     addRow.innerHTML = `
       <input type="color" class="add-color-picker" value="${presetHex}" title="Выбрать цвет">
@@ -1307,14 +1401,11 @@ function renderCustomPalettes() {
     customPalettesList.appendChild(card);
   });
 }
-
 function escapeHtml(s) {
   return String(s)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;')
     .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
-
-/* --- Создание палитры --- */
 function handleCreatePalette() {
   const name = newPaletteNameInput.value.trim();
   if (!name) { showToast('Введите название палитры'); newPaletteNameInput.focus(); return; }
@@ -1327,7 +1418,6 @@ newPaletteNameInput.addEventListener('keydown', e => {
   if (e.key === 'Enter') { e.preventDefault(); handleCreatePalette(); }
 });
 
-/* --- Делегирование событий для своих палитр --- */
 customPalettesList.addEventListener('click', e => {
   const delPalBtn = e.target.closest('.delete-palette-btn');
   if (delPalBtn) {
@@ -1339,13 +1429,8 @@ customPalettesList.addEventListener('click', e => {
     }
     return;
   }
-
   const removeBtn = e.target.closest('.remove-color-btn');
-  if (removeBtn) {
-    removeColorFromPalette(removeBtn.dataset.paletteId, removeBtn.dataset.hex);
-    return;
-  }
-
+  if (removeBtn) { removeColorFromPalette(removeBtn.dataset.paletteId, removeBtn.dataset.hex); return; }
   const addBtn = e.target.closest('.add-color-btn');
   if (addBtn) {
     const row = addBtn.closest('.add-color-row');
@@ -1353,18 +1438,11 @@ customPalettesList.addEventListener('click', e => {
     const pickerEl = row.querySelector('.add-color-picker');
     let v = normalizeHex(hexInputEl.value);
     if (!v) v = pickerEl.value;
-    if (addColorToPalette(addBtn.dataset.paletteId, v)) {
-      showToast('Цвет добавлен');
-    }
+    if (addColorToPalette(addBtn.dataset.paletteId, v)) showToast('Цвет добавлен');
     return;
   }
-
   const copyBtn = e.target.closest('.copy-btn');
-  if (copyBtn) {
-    copyText(copyBtn.dataset.copy, copyBtn.querySelector('.k').textContent);
-    return;
-  }
-
+  if (copyBtn) { copyText(copyBtn.dataset.copy, copyBtn.querySelector('.k').textContent); return; }
   const colorBlock = e.target.closest('.color-block');
   if (colorBlock) {
     const item = colorBlock.closest('.color-item');
@@ -1384,22 +1462,18 @@ customPalettesList.addEventListener('input', e => {
   const pickerEl = e.target.closest('.add-color-picker');
   if (pickerEl) {
     const row = pickerEl.closest('.add-color-row');
-    const hexFieldEl = row.querySelector('.add-color-hex');
-    hexFieldEl.value = pickerEl.value.toUpperCase();
+    row.querySelector('.add-color-hex').value = pickerEl.value.toUpperCase();
   }
 });
-
 customPalettesList.addEventListener('keydown', e => {
   if (e.key === 'Enter' && e.target.classList.contains('add-color-hex')) {
     e.preventDefault();
-    const row = e.target.closest('.add-color-row');
-    const addBtn = row.querySelector('.add-color-btn');
-    addBtn.click();
+    e.target.closest('.add-color-row').querySelector('.add-color-btn').click();
   }
 });
 
 /* ============================================================
-   Влияние света
+   Влияние света (только пресеты)
    ============================================================ */
 function applyLightColor(baseRgb, lightRgb, intensity) {
   const [lr, lg, lb] = lightRgb;
@@ -1475,7 +1549,6 @@ function setColor(hex, syncInput = true) {
   render();
   renderLight();
 }
-
 function copyText(text, label) {
   const okMsg = 'Скопировано ' + (label ? label + ': ' : '') + text;
   const failMsg = 'Не удалось скопировать';
@@ -1505,6 +1578,13 @@ themeBtn.addEventListener('click', () => {
   const current = document.documentElement.getAttribute('data-theme');
   applyTheme(current === 'dark' ? 'light' : 'dark');
 });
+
+/* ============================================================
+   Кнопки размера шрифта
+   ============================================================ */
+document.getElementById('fsDec').addEventListener('click', () => applyFontScale(fontSizeScale - FS_STEP));
+document.getElementById('fsInc').addEventListener('click', () => applyFontScale(fontSizeScale + FS_STEP));
+document.getElementById('fsReset').addEventListener('click', () => applyFontScale(1.0));
 
 /* ============================================================
    Ввод цвета на главной
@@ -1604,6 +1684,7 @@ quoteBlock.addEventListener('click', () => {
   let saved = 'light';
   try { saved = localStorage.getItem('colorwheel-theme') || 'light'; } catch (e) {}
   applyTheme(saved);
+  loadFontScale();
   loadHistory();
   loadCustomPalettes();
   setRandomQuote();
